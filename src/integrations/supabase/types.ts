@@ -14,13 +14,254 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          created_at: string
+          custom_message: string | null
+          description: string | null
+          event_date: string | null
+          group_id: string
+          id: string
+          invite_url: string | null
+          location: string | null
+          title: string
+          uploader_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_message?: string | null
+          description?: string | null
+          event_date?: string | null
+          group_id: string
+          id?: string
+          invite_url?: string | null
+          location?: string | null
+          title: string
+          uploader_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_message?: string | null
+          description?: string | null
+          event_date?: string | null
+          group_id?: string
+          id?: string
+          invite_url?: string | null
+          location?: string | null
+          title?: string
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          created_at: string
+          creator_id: string
+          description: string | null
+          id: string
+          join_code: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          id?: string
+          join_code: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          id?: string
+          join_code?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          group_id: string
+          id: string
+          notify_events: boolean
+          notify_photos: boolean
+          notify_posts: boolean
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          notify_events?: boolean
+          notify_photos?: boolean
+          notify_posts?: boolean
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          notify_events?: boolean
+          notify_photos?: boolean
+          notify_posts?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          custom_message: string | null
+          group_id: string
+          id: string
+          image_url: string
+          uploader_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          custom_message?: string | null
+          group_id: string
+          id?: string
+          image_url: string
+          uploader_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          custom_message?: string | null
+          group_id?: string
+          id?: string
+          image_url?: string
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          content: string
+          created_at: string
+          custom_message: string | null
+          group_id: string
+          id: string
+          title: string
+          uploader_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          custom_message?: string | null
+          group_id: string
+          id?: string
+          title: string
+          uploader_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          custom_message?: string | null
+          group_id?: string
+          id?: string
+          title?: string
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          email: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_group_creator: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_group_member: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
