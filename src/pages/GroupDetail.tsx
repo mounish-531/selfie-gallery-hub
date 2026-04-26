@@ -174,7 +174,7 @@ async function notify(groupId: string, type: "photos" | "events" | "posts", titl
   }
 }
 
-const PhotoSection = ({ groupId, groupName, photos, onChange }: { groupId: string; groupName: string; photos: Photo[]; onChange: () => void }) => {
+const PhotoSection = ({ groupId, groupName, photos, onChange, onPhotoShared }: { groupId: string; groupName: string; photos: Photo[]; onChange: () => void; onPhotoShared?: (photo: Photo) => void }) => {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
@@ -189,12 +189,13 @@ const PhotoSection = ({ groupId, groupName, photos, onChange }: { groupId: strin
     try {
       const url = await uploadFile(file, groupId);
       const { data: { user } } = await supabase.auth.getUser();
-      const { error } = await supabase.from("photos").insert({
+      const { data: newPhoto, error } = await supabase.from("photos").insert({
         group_id: groupId, uploader_id: user!.id, image_url: url,
         caption: caption.trim() || null, custom_message: message.trim() || null,
-      });
+      }).select("*").single();
       if (error) throw error;
       toast.success("Photo shared!");
+      if (newPhoto) onPhotoShared?.({ ...(newPhoto as Photo), uploader: { display_name: "You" } });
       await notify(groupId, "photos", caption.trim() || "New photo", message, groupName);
       setOpen(false); setFile(null); setCaption(""); setMessage("");
       onChange();
