@@ -11,6 +11,7 @@ interface Body {
   title: string;
   custom_message: string | null;
   group_name: string;
+  recipient_emails?: string[];
 }
 
 const TYPE_LABEL: Record<Body["type"], string> = {
