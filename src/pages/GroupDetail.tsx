@@ -115,7 +115,7 @@ const GroupDetail = () => {
           </TabsList>
 
           <TabsContent value="photos" className="mt-6">
-            <PhotoSection groupId={group.id} groupName={group.name} photos={photos} onChange={load} />
+            <PhotoSection groupId={group.id} groupName={group.name} photos={photos} onChange={load} onPhotoShared={(photo) => setPhotos((current) => [photo, ...current])} />
           </TabsContent>
           <TabsContent value="events" className="mt-6">
             <EventSection groupId={group.id} groupName={group.name} events={events} onChange={load} />
