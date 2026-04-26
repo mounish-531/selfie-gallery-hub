@@ -34,39 +34,32 @@ const GroupDetail = () => {
   const load = async () => {
     if (!id) return;
     setLoading(true);
-    const [g, ph, ev, po, mc, pr] = await Promise.all([
-      supabase.from("groups").select("*").eq("id", id).maybeSingle(),
-      supabase.from("photos").select("*").eq("group_id", id).order("created_at", { ascending: false }),
-      supabase.from("events").select("*").eq("group_id", id).order("created_at", { ascending: false }),
-      supabase.from("posts").select("*").eq("group_id", id).order("created_at", { ascending: false }),
-      supabase.from("group_members").select("id", { count: "exact", head: true }).eq("group_id", id),
-      supabase.from("notification_preferences").select("*").eq("group_id", id).maybeSingle(),
-    ]);
-    if (g.error) { toast.error(g.error.message); navigate("/groups"); return; }
-    if (ph.error) console.error("photos load error", ph.error);
-    if (ev.error) console.error("events load error", ev.error);
-    if (po.error) console.error("posts load error", po.error);
+    try {
+      const { data, error } = await supabase.functions.invoke("get-group-content", {
+        body: { group_id: id },
+      });
 
-    // Fetch uploader display names separately (no FK relationship to embed)
-    const uploaderIds = Array.from(new Set([
-      ...((ph.data as any[]) || []).map((x) => x.uploader_id),
-      ...((ev.data as any[]) || []).map((x) => x.uploader_id),
-      ...((po.data as any[]) || []).map((x) => x.uploader_id),
-    ]));
-    const profileMap: Record<string, { display_name: string }> = {};
-    if (uploaderIds.length > 0) {
-      const { data: profs } = await supabase.from("profiles").select("id, display_name").in("id", uploaderIds);
-      (profs || []).forEach((p: any) => { profileMap[p.id] = { display_name: p.display_name }; });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setGroup(data.group as Group);
+      setPhotos((data.photos as Photo[]) || []);
+      setEvents((data.events as Event[]) || []);
+      setPosts((data.posts as Post[]) || []);
+      setMemberCount(data.memberCount || 0);
+      if (data.prefs) {
+        setPrefs({
+          notify_photos: data.prefs.notify_photos,
+          notify_events: data.prefs.notify_events,
+          notify_posts: data.prefs.notify_posts,
+        });
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Could not load group content");
+      navigate("/groups");
+    } finally {
+      setLoading(false);
     }
-    const attach = (rows: any[]) => rows.map((r) => ({ ...r, uploader: profileMap[r.uploader_id] }));
-
-    setGroup(g.data as Group);
-    setPhotos(attach((ph.data as any[]) || []));
-    setEvents(attach((ev.data as any[]) || []));
-    setPosts(attach((po.data as any[]) || []));
-    setMemberCount(mc.count || 0);
-    if (pr.data) setPrefs({ notify_photos: pr.data.notify_photos, notify_events: pr.data.notify_events, notify_posts: pr.data.notify_posts });
-    setLoading(false);
   };
   useEffect(() => { load(); }, [id]);
 
